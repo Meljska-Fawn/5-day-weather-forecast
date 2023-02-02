@@ -1,13 +1,23 @@
 // container below search where city names are displayed
-var cityContainer = document.getElementById('city-names');
+let cityContainer = document.getElementById('city-names');
 // search button
-var fetchButton = document.getElementById('fetch-button');
-var APIKey = "af6fe5609e13717cb920c672710093bd";
+let searchButton = document.getElementById('search-button');
+let cityInputEl = document.querySelector('#city-input');
+let currentWeatherEl = document.getElementById('current-weather');
+// let currentCityEl = document.getElementById('city-name');
+// let currentDateEl = document.getElementById('current-date');
+// let currentTempEl = document.getElementById('temp');
+// let weatherIconEl = document.getElementById('weather-icon');
+// let currentWindEl = document.getElementById('wind');
+// let currentHumidityEl = document.getElementById('humidity');
+let headerEl = document.getElementById('fiveday-header');
 
-function getCityname() {
-    let cityInputEl = document.querySelector('#city-input');
+var APIKey = "af6fe5609e13717cb920c672710093bd";
+let searchHistory = JSON.parse(localStorage.getItem("search")) || [];
+
+function weatherForecast() {
     var cityName = cityInputEl.value.trim();
-    //   var userCity = user input  
+
     var requestCity = 'http://api.openweathermap.org/geo/1.0/direct?q=' + cityName + '&limit=1&appid=' + APIKey;
 
     fetch(requestCity)
@@ -18,39 +28,51 @@ function getCityname() {
             console.log(data)
 
             for (var i = 0; i < data.length; i++) {
-                var createTableRow = document.createElement('tr');
-                var tableData = document.createElement('td');
-                var button = document.createElement('button');
 
-                button.textContent = data[i].name;
-
-                lat = data[i].lat;
+                let lat = data[i].lat;
                 console.log(lat);
-                lon = data[i].lon;
+                let lon = data[i].lon;
                 console.log(lon);
 
-                tableData.appendChild(button);
-                createTableRow.appendChild(tableData);
-                cityContainer.appendChild(createTableRow);
+                var requestUrl = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&limit=5&appid=' + APIKey;
+
+                fetch(requestUrl)
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        console.log(data);
+
+                        for (var i = 0; i < data.length; i++) {
+
+                            var cityName = document.createElement('h3');
+                            var date = document.createElement('h3');
+                            var icon = document.createElement('p');
+                            var temp = document.createElement('p');
+                            var wind = document.createElement('p');
+                            var humidity = document.createElement('p');
+
+                            cityName.textContent = data[i].city.name;
+                            date.textContent = data[i].list.dt_txt;
+                            icon.textContent = data[i].list.weather.icon;
+                            temp.textContent = data[i].list.main.temp;
+                            wind.textContent = data[i].list.wind.speed;
+                            humidity.textContent = data[i].list.main.humidity;
+
+                            currentWeatherEl.append(cityName);
+                            currentWeatherEl.append(date);
+                            currentWeatherEl.append(icon);
+                            currentWeatherEl.append(temp);
+                            currentWeatherEl.append(wind);
+                            currentWeatherEl.append(humidity);
+                        }
+                    });
             }
         });
 
-    var requestUrl = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&limit=5&appid=' + APIKey;
-
-    fetch(requestUrl)
-        .then(function (response) {
-                return response.json();
-        })
-        .then(function (data) {
-        console.log(data);
-    });
-
 }
 
-fetchButton.addEventListener('click', getCityname);
-// today's date
-// var today = dayjs();
-// $('#date').text(today.format('MMM D, YYYY'));
+searchButton.addEventListener('click', weatherForecast);
 
 function getApi() {
 
@@ -86,5 +108,5 @@ function getApi() {
             // }
         });
 }
-// fetchButton.addEventListener('click', getApi);
+
 // fetchButton.addEventListener('submit', formSubmitHandler);

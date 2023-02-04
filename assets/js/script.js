@@ -7,7 +7,7 @@ let currentWeatherEl = document.getElementById('current-weather');
 let fivedayForecastEl = document.querySelectorAll(".forecast");
 let headerEl = document.getElementById('fiveday-header');
 let searchHistoryEl = document.getElementById('search-history');
-let clearHistoryBtn = document.getElementById('clear-history');
+let clearHistoryBtn = document.getElementById('clear-button');
 let searchHistory = JSON.parse(localStorage.getItem("search")) || [];
 
 var APIKey = "af6fe5609e13717cb920c672710093bd";
@@ -15,8 +15,8 @@ var APIKey = "af6fe5609e13717cb920c672710093bd";
 
 function weatherForecast() {
 
-    function getCoordinates() {
-        var cityName = cityInputEl.value.trim();
+    function getCoordinates(cityName) {
+        
         var requestCity = 'http://api.openweathermap.org/geo/1.0/direct?q=' + cityName + '&limit=1&appid=' + APIKey;
 
         fetch(requestCity)
@@ -24,12 +24,9 @@ function weatherForecast() {
                 return response.json();
             })
             .then(function (data) {
-                console.log(data)
 
                 let lat = data[0].lat;
-                console.log(lat);
                 let lon = data[0].lon;
-                console.log(lon);
 
                 getWeather(lat, lon);
 
@@ -37,6 +34,8 @@ function weatherForecast() {
     }
 
     function getWeather(lat, lon) {
+
+        currentWeatherEl.textContent = "";
 
         currentWeatherEl.classList.remove("d-none");
         headerEl.classList.remove("d-none");
@@ -85,9 +84,10 @@ function weatherForecast() {
                 currentWeatherEl.append(humidity);
 
                 // 5-Day forecast
-                // let fivedayForecastEl = document.querySelectorAll(".forecast");
 
-                for (i = 0; fivedayForecastEl.length; i++) {
+                for (i = 0; i < fivedayForecastEl.length; i++) {
+                    
+                    fivedayForecastEl[i].textContent = "";
 
                     let convertDay = i * 8 + 4;
 
@@ -134,13 +134,20 @@ function weatherForecast() {
         var cityName = cityInputEl.value.trim();
         getCoordinates(cityName);
 
+        if (!searchHistory.includes(cityName)) {
         searchHistory.push(cityName);
         localStorage.setItem("search", JSON.stringify(searchHistory));
+        }
         displayHistory();
+    })
 
+    clearHistoryBtn.addEventListener("click", function() {
+        localStorage.clear();
+        displayHistory(searchHistory = []);
     })
 
     function displayHistory() {
+        searchHistoryEl.textContent = "";
 
         for (i = 0; i < searchHistory.length; i++) {
             let historyEl = document.createElement("input");
@@ -149,23 +156,15 @@ function weatherForecast() {
             historyEl.setAttribute("readonly", true);
             historyEl.setAttribute("class", "form-control d-block bg-white my-2");
             historyEl.setAttribute("value", searchHistory[i]);
+            console.log(historyEl);
 
             historyEl.addEventListener("click", function () {
-                currentWeatherEl.textContent = "";
-                fivedayForecastEl.textContent = "";
-
-                getCoordinates(historyEl.value.trim());
+                getCoordinates(historyEl.value);
             })
 
             searchHistoryEl.append(historyEl);
-            console.log(searchHistoryEl);
         }
     }
-
-    clearHistoryBtn.addEventListener('click', function() {
-        window.localStorage.clear();
-    })
 }
-
 
 weatherForecast();

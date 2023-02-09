@@ -12,7 +12,7 @@ function weatherForecast() {
 
     function getCoordinates(cityName) {
 
-        var requestCity = 'http://api.openweathermap.org/geo/1.0/direct?q=' + cityName + '&limit=1&appid=' + APIKey;
+        var requestCity = 'https://api.openweathermap.org/geo/1.0/direct?q=' + cityName + '&limit=1&appid=' + APIKey;
 
         fetch(requestCity)
             .then(function (response) {
